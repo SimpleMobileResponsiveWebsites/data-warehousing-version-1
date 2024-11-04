@@ -46,8 +46,7 @@ def upload_data():
             }
 
             # Append metadata to the metadata file
-            metadata_df = pd.read_csv(METADATA_FILE)
-            metadata_df = metadata_df.append(metadata, ignore_index=True)
+            metadata_df = pd.concat([pd.read_csv(METADATA_FILE), pd.DataFrame([metadata])], ignore_index=True)
             metadata_df.to_csv(METADATA_FILE, index=False)
 
             # Save the data to a .csv file in the data directory
@@ -77,10 +76,26 @@ def transform_data():
     # Load data for transformation
     df = pd.read_csv(data_file_path)
 
-    # Perform transformations (as previously defined)
-    # ...
+    # Transformation options
+    transformation_options = ["Filter by column", "Sort by column", "Remove duplicates"]
+    selected_transformation = st.selectbox("Select Transformation", transformation_options)
+
+    if selected_transformation == "Filter by column":
+        columns = df.columns.tolist()
+        selected_column = st.selectbox("Select Column", columns)
+        filter_value = st.text_input("Filter Value")
+        df = df[df[selected_column] == filter_value]
+    elif selected_transformation == "Sort by column":
+        columns = df.columns.tolist()
+        selected_column = st.selectbox("Select Column", columns)
+        df = df.sort_values(by=selected_column)
+    elif selected_transformation == "Remove duplicates":
+        df = df.drop_duplicates()
+
     # Save the transformed data
     df.to_csv(data_file_path, index=False)
+
+    st.success("Data transformed successfully!")
 
 # Data export function
 def export_data():
@@ -100,21 +115,9 @@ def export_data():
     # Load data for export
     df = pd.read_csv(data_file_path)
 
-    # Export options as previously defined
-    # ...
+    # Export options
+    export_options = ["Export to CSV", "Export to JSON", "Visualize data"]
+    selected_export = st.selectbox("Select Export Option", export_options)
 
-# Main application
-def main():
-    st.title("🏭 Data Warehouse Management System")
-    st.sidebar.title("Navigation")
-    page = st.sidebar.radio("Go to", ["Data Ingestion", "Data Transformation", "Data Export"])
-    
-    if page == "Data Ingestion":
-        upload_data()
-    elif page == "Data Transformation":
-        transform_data()
-    elif page == "Data Export":
-        export_data()
-
-if __name__ == "__main__":
-    main()
+    if selected_export == "Export to CSV":
+        df.to_csv("export
